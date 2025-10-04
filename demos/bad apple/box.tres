@@ -1,0 +1,7 @@
+[gd_resource type="BoxMesh" load_steps=2 format=3 uid="uid://dcorouxfhax68"]
+
+[ext_resource type="Material" uid="uid://c3d068d6f5gj1" path="res://demos/bad apple/mat.tres" id="1_gdrfk"]
+
+[resource]
+resource_local_to_scene = true
+material = ExtResource("1_gdrfk")
