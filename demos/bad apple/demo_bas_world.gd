@@ -13,7 +13,7 @@ var multimesh : MultiMesh
 @export var z_dist : int = 4000
 @export var gap : float = 2.0
 
-@export var start : bool = false 
+@export var start : bool = false
 var mode : int = 0
 var finished : bool = true
 
@@ -22,8 +22,13 @@ var bas_started = false
 var mmentity : RID
 var badapplesystem : BadAppleSystem
 
+var script_system_rid : RID
+
+var frame_count : int = 0
+
 func _process(delta: float) -> void:
 	mscount = mscount + delta;
+	frame_count += 1
 	if(Input.is_key_pressed(KEY_ENTER)):
 		start = true
 		pass
@@ -38,7 +43,7 @@ func _process(delta: float) -> void:
 		pass
 	badapplesystem.mode = mode;
 	if(video && !video.is_playing() and start and finished):
-		
+
 		if(!bas_started):
 			var result = SceneObjectUtility.get_singleton().create_entity(world, multi_mesh_instance_3d)
 			mmentity = result[0]
@@ -53,15 +58,21 @@ func _process(delta: float) -> void:
 	if(video && !video.is_playing() and start && !finished):
 		start = false;
 		finished = true;
-		
+
 		pass
 	FlecsServer.progress_world(world,delta)
- 
+	if(frame_count < -10000):
+		var sys_info = FlecsServer.get_script_system_info(world, script_system_rid)
+		for key in sys_info:
+			var variant : Variant = sys_info[key]
+			print("{0} : {1}".format([key,variant]))
+					
+				
 
-func test(_entity : RID) -> void:
+func test(e) -> void:
 	count += 1;
 	if(count == 10 || count == 100 || count == 1000 || count == 10000 || count == 100000 || count == 1000000):
-		print("iterated: " + String.num_int64(count) + " times in: " + String.num(mscount* pow(10,9),2) + "ns.");
+		print("print","iterated: " + String.num_int64(count) + " times in: " + String.num(mscount* pow(10,9),2) + "ns.");
 		print("iterated: " + String.num_int64(count) + " times in: " + String.num(mscount* pow(10,3),2) + "ms.");
 		print("iterated: " + String.num_int64(count) + " times in: " + String.num(mscount,2) + "s.");
 		return;
@@ -80,7 +91,7 @@ func test(_entity : RID) -> void:
 		print("iterated: 1000000000 times in: " + String.num(mscount* pow(10,3),2) + "ms.");
 		print("iterated: 1000000000 times in: " + String.num(mscount,2) + "s.");
 		return;
-	
+
 @warning_ignore("unused_parameter")
 func test2(entity : RID) -> void:
 	count += 1
@@ -101,27 +112,25 @@ func _ready() -> void:
 	var instance_transform : Transform3D = Transform3D()
 	var x : float = 0
 	var y : float = 0
-	instance_transform.origin = Vector3(x, y, z_dist) 
+	instance_transform.origin = Vector3(x, y, z_dist)
 
 	for i in range(1,multimesh.instance_count):
 		x = i % vid_resolution.x
 		@warning_ignore("integer_division")
 		y = i / vid_resolution.x
-		
+
 		instance_transform.origin = Vector3(x, y, 0) * gap + Vector3(0,0,z_dist)
 		multimesh.set_instance_transform(i, instance_transform)
 		multimesh.set_instance_color(i, Color.BLACK)
 
 	var world3ddict : Dictionary = {
-		
+
 	}
 	FlecsServer.set_world_singleton_with_name(world, "World3DComponent", world3ddict )
 	badapplesystem = BadAppleSystem.new()
-	
-	
+	# disabled because it is currently broken
+	script_system_rid = FlecsServer.add_script_system(world, Array(), Callable(self, "test"))
+	#FlecsServer.set_script_system_multi_threaded(world, script_system_rid, true)
+	#FlecsServer.set_script_system_instrumentation(world, script_system_rid, true)
+	FlecsServer.set_script_system_dispatch_mode(world, script_system_rid, 1)
 	return
-	
-	
-	
-	
-	

@@ -19,6 +19,14 @@ config/icon="res://icon.svg"
 
 window/vsync/vsync_mode=0
 
+[dotnet]
+
+project/assembly_name="VYGR"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/freecam_3D/plugin.cfg")
+
 [global_group]
 
 test=""
